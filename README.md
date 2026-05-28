@@ -610,6 +610,9 @@ Developed by Satya Murari Guna
 
 ---
 
+<p align="center"> <img src="assets/preview2.png" width="850"> </p>
+
+---
 # 📜 License
 
 This project is intended for educational and research purposes only.
