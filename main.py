@@ -58,27 +58,25 @@ $$\   $$ |$$ |      $$ |  $$\ $$ |      $$ |  $$ |$$ |  $$ |
 \$$$$$$  |$$$$$$$$\ \$$$$$$  |$$$$$$$$\ $$ |  $$ |$$$$$$$  |
  \______/ \________| \______/ \________|\__|  \__|\_______/
 """
-
 BANNER_PIRATE = r"""
-                      .-.
-                     (o.o)
-                      |=|
-                     __|__
-                     //.=|=.\\
-                     // .=|=. \\
-                     \\ .=|=. //
-                     \\(_=_)//
-                     (:| |:)
-                     || ||
-                     () ()
-                     || ||
-                     || ||
-                    ==' '==
+            .-.
+            (o.o)
+            |=|
+            __|__
+            //.=|=.\\
+            // .=|=. \\
+            \\ .=|=. //
+            \\(_=_)//
+            (:| |:)
+            || ||
+            () ()
+            || ||
+            || ||
+            ==' '==
 
-              ☠  DEAD MEN'S BYTES  ☠
-             ~ Hack the seas safely ~
+         ☠ DEAD MEN'S BYTES ☠
+        ~ Hack the seas safely ~
 """
-
 BANNERS = [BANNER_SECLAB, BANNER_PIRATE]
 
 
@@ -217,23 +215,23 @@ ICONS = {
     "exit": "🚪",
 }
 
-
 def render_header():
 
     clear()
 
-    w = max(72, min(width(), 100))
+    w = shutil.get_terminal_size().columns
+    content_width = 70
 
-    banner = current_banner()
+    banner = current_banner().splitlines()
 
     print("\033[96m")
 
-    for line in banner.splitlines():
+    for line in banner:
         print(line.center(w))
 
     print("\033[0m")
 
-    hline("═", "cyan")
+    print(center("═" * content_width, w))
 
     cprint(
         "Security Education & Awareness Laboratory",
@@ -242,22 +240,23 @@ def render_header():
     )
 
     cprint(
-        "[ For Educational Purposes Only · Run Locally ]",
+        "[ For Educational Purposes Only • Run Locally ]",
         "dim",
         w
     )
 
-    hline("═", "cyan")
+    print(center("═" * content_width, w))
 
     print()
 
 
 
-def render_main_menu():
 
+def render_main_menu():
     render_header()
 
-    w = max(72, min(width(), 100))
+    w = shutil.get_terminal_size().columns
+    content_width = 50
 
     cprint("MAIN MENU", "yellow", w)
 
@@ -267,17 +266,19 @@ def render_main_menu():
 
         icon = ICONS.get(module, " ")
 
-        line = f" [{key}]  {icon:<2}  {label:<30}"
+        line = f"[{key}]  {icon}  {label}"
+
+        padded = line.ljust(content_width)
 
         if key == "0":
-            print("\033[91m" + center(line, w) + "\033[0m")
-
+            print("\033[91m" + padded.center(w) + "\033[0m")
         else:
-            print("\033[97m" + center(line, w) + "\033[0m")
+            print("\033[97m" + padded.center(w) + "\033[0m")
 
     print()
 
-    hline("─", "dim")
+    print(center("─" * 70, w))
+
 
 
 def render_sub_menu(module_key, title):
