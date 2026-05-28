@@ -94,8 +94,8 @@ SecLab-Toolkit/
 ## 1. Clone the Repository
 
 ```bash id="4iwd0x"
-git clone <repository-url>
-cd SecLab-Toolkit
+git clone https://github.com/murariguna/SECLAB.git
+cd SECLAB
 ```
 
 ---
@@ -105,13 +105,6 @@ cd SecLab-Toolkit
 ```bash id="twjlwm"
 pip install -r requirements.txt
 ```
-
-If a requirements file is not available:
-
-```bash id="a02nzi"
-pip install paramiko pycryptodome opencv-python pyautogui
-```
-
 ---
 
 # ▶️ Running the Project
@@ -153,8 +146,6 @@ The Cryptography Module demonstrates both classical and modern cryptographic tec
 
 ### 1. AES Encryption Demo
 
-**File:** `aes_demo.py`
-
 Demonstrates AES (Advanced Encryption Standard) symmetric encryption and decryption using CBC mode.
 
 #### Features
@@ -174,8 +165,6 @@ Demonstrates AES (Advanced Encryption Standard) symmetric encryption and decrypt
 
 ### 2. RSA Encryption Demo
 
-**File:** `rsa_demo.py`
-
 Demonstrates RSA asymmetric encryption using public and private keys.
 
 #### Features
@@ -193,8 +182,6 @@ Demonstrates RSA asymmetric encryption using public and private keys.
 ---
 
 ### 3. Digital Signature Demo
-
-**File:** `digital_signature_demo.py`
 
 Demonstrates how digital signatures work using RSA and SHA-256.
 
@@ -215,8 +202,6 @@ Demonstrates how digital signatures work using RSA and SHA-256.
 
 ### 4. Secure File Encryptor
 
-**File:** `secure_file_encryptor.py`
-
 Encrypts and decrypts files securely using AES encryption.
 
 #### Features
@@ -236,8 +221,6 @@ Encrypts and decrypts files securely using AES encryption.
 
 ### 5. Caesar Cipher
 
-**File:** `caesar_cipher.py`
-
 Implements the classical Caesar substitution cipher.
 
 #### Features
@@ -255,8 +238,6 @@ Implements the classical Caesar substitution cipher.
 
 ### 6. Vigenère Cipher
 
-**File:** `vigenere_cipher.py`
-
 Implements the Vigenère polyalphabetic cipher using keyword-based encryption.
 
 #### Features
@@ -272,8 +253,6 @@ Implements the Vigenère polyalphabetic cipher using keyword-based encryption.
 ---
 
 ### 7. Base64 Encoder/Decoder
-
-**File:** `base64_encoder_decoder.py`
 
 Encodes and decodes Base64 text data.
 
@@ -291,8 +270,6 @@ Encodes and decodes Base64 text data.
 
 ### 8. Hex Encoder/Decoder
 
-**File:** `hex_encoder_decoder.py`
-
 Encodes and decodes hexadecimal strings.
 
 #### Features
@@ -308,8 +285,6 @@ Encodes and decodes hexadecimal strings.
 ---
 
 ### 9. URL Encoder/Decoder
-
-**File:** `url_encoder_decoder.py`
 
 Performs URL-safe encoding and decoding.
 
@@ -327,8 +302,6 @@ Performs URL-safe encoding and decoding.
 
 ### 10. Hash Generator
 
-**File:** `hash_generator.py`
-
 Generates SHA-256 hashes for passwords or text.
 
 #### Features
@@ -343,8 +316,6 @@ Generates SHA-256 hashes for passwords or text.
 ---
 
 ### 11. Hash Identifier
-
-**File:** `hash_identifier.py`
 
 Identifies common hash algorithms based on pattern and length.
 
@@ -364,8 +335,6 @@ Identifies common hash algorithms based on pattern and length.
 
 ### 12. File Hash Checker
 
-**File:** `file_hash_checker.py`
-
 Calculates hashes of files for integrity verification.
 
 #### Features
@@ -383,8 +352,6 @@ Calculates hashes of files for integrity verification.
 ---
 
 ### 13. Steganography Tool
-
-**File:** `Steganography.py`
 
 Hides secret messages inside images using LSB (Least Significant Bit) steganography.
 
@@ -412,8 +379,6 @@ The Password Security Module focuses on password generation, password auditing, 
 
 ### 1. Password Generator
 
-**File:** `generator.py`
-
 Generates secure random passwords based on user preferences.
 
 #### Features
@@ -431,8 +396,6 @@ Generates secure random passwords based on user preferences.
 
 ### 2. Password Strength Checker
 
-**File:** `strength.py`
-
 Analyzes password complexity and determines its security level.
 
 #### Features
@@ -448,8 +411,6 @@ Analyzes password complexity and determines its security level.
 ---
 
 ### 3. Password Entropy Calculator
-
-**File:** `password_entropy_calculator.py`
 
 Calculates password entropy in bits.
 
@@ -467,8 +428,6 @@ Calculates password entropy in bits.
 
 ### 4. Common Password Detector
 
-**File:** `commonpassworddetector.py`
-
 Checks whether a password exists in a common-password dictionary.
 
 #### Features
@@ -483,8 +442,6 @@ Checks whether a password exists in a common-password dictionary.
 ---
 
 ### 5. Password Attack Simulator
-
-**File:** `attack_simulator.py`
 
 Simulates password guessing and brute-force behavior for educational purposes.
 
@@ -509,8 +466,6 @@ The Honeypot Module simulates an SSH server to monitor and log attacker activity
 ---
 
 ## 📜 SSH Honeypot
-
-**File:** `honeypot.py`
 
 A simulated SSH server that records login attempts and commands executed by attackers.
 
@@ -647,9 +602,7 @@ Do not use this toolkit against systems you do not own or have permission to tes
 
 # 👨‍💻 Author
 
-Developed by Murari Guna
-
-Cybersecurity Student | Security Enthusiast | Ethical Hacking Learner
+Developed by Satya Murari Guna
 
 ---
 
