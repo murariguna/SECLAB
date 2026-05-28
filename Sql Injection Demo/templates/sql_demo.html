@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Injection Awareness Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after {
+            margin: 0; padding: 0; box-sizing: border-box;
+        }
+
+        :root {
+            --card-bg:      rgba(255, 255, 255, 0.06);
+            --card-border:  rgba(255, 255, 255, 0.11);
+            --input-bg:     rgba(255, 255, 255, 0.05);
+            --input-border: rgba(255, 255, 255, 0.13);
+            --text-primary:   #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-hint:      #475569;
+            --amber:  #f59e0b;
+            --amber-dim: rgba(245,158,11,0.15);
+            --amber-border: rgba(245,158,11,0.28);
+            --red:    #f87171;
+            --red-dim: rgba(248,113,113,0.12);
+            --red-border: rgba(248,113,113,0.25);
+            --green:  #4ade80;
+            --blue:   #60a5fa;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'DM Sans', sans-serif;
+            background: #0d1117;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ambient glows */
+        .glow {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .glow-1 {
+            width: 480px; height: 480px;
+            background: radial-gradient(circle, rgba(245,158,11,0.11) 0%, transparent 70%);
+            top: -160px; left: -120px;
+            animation: drift 11s ease-in-out infinite alternate;
+        }
+        .glow-2 {
+            width: 420px; height: 420px;
+            background: radial-gradient(circle, rgba(59,130,246,0.10) 0%, transparent 70%);
+            bottom: -120px; right: -80px;
+            animation: drift 11s ease-in-out infinite alternate-reverse;
+        }
+        @keyframes drift {
+            from { transform: translate(0, 0); }
+            to   { transform: translate(35px, 45px); }
+        }
+
+        /* Layout */
+        .layout {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(22px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+            padding: 36px 32px;
+        }
+
+        /* Left card — form */
+        .card-left { display: flex; flex-direction: column; gap: 24px; }
+
+        .card-header { display: flex; flex-direction: column; gap: 10px; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--amber-dim);
+            border: 1px solid var(--amber-border);
+            border-radius: 100px;
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--amber);
+            letter-spacing: 0.3px;
+            width: fit-content;
+        }
+        .badge-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--amber);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity:1; transform:scale(1); }
+            50%      { opacity:0.4; transform:scale(0.8); }
+        }
+
+        .icon-wrap {
+            width: 46px; height: 46px;
+            border-radius: 12px;
+            background: var(--amber-dim);
+            border: 1px solid var(--amber-border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+        .subtitle {
+            font-size: 14px;
+            line-height: 1.65;
+            color: var(--text-secondary);
+        }
+
+        /* Form fields */
+        .field { display: flex; flex-direction: column; gap: 8px; }
+
+        label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.2px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            font-family: 'DM Mono', monospace;
+            font-size: 14px;
+            color: var(--text-primary);
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        input::placeholder { color: var(--text-hint); }
+        input:focus {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(245,158,11,0.45);
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.12);
+        }
+
+        /* Suggestion chips */
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .chip {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--amber);
+            background: var(--amber-dim);
+            border: 1px solid var(--amber-border);
+            border-radius: 6px;
+            padding: 4px 9px;
+            cursor: pointer;
+            transition: background 0.15s;
+            user-select: none;
+        }
+        .chip:hover { background: rgba(245,158,11,0.22); }
+
+        .chip-label {
+            font-size: 11px;
+            color: var(--text-hint);
+            margin-bottom: 4px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 13px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #b45309, #d97706);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 18px rgba(245,158,11,0.28);
+            letter-spacing: 0.1px;
+        }
+        .btn:hover { opacity:0.9; transform:translateY(-1px); box-shadow:0 6px 22px rgba(245,158,11,0.38); }
+        .btn:active { transform:translateY(0); opacity:1; }
+
+        /* Right card — live query viewer */
+        .card-right { display: flex; flex-direction: column; gap: 20px; }
+
+        .panel-label {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-hint);
+        }
+
+        /* Query display */
+        .query-block {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 18px;
+        }
+        .query-block pre {
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            line-height: 1.75;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #94a3b8;
+        }
+        .query-block .kw   { color: #60a5fa; }   /* SQL keywords */
+        .query-block .str  { color: #86efac; }   /* string literals */
+        .query-block .inj  { color: #f87171; font-weight: 500; } /* injected part */
+        .query-block .safe { color: #4ade80; }   /* safe input */
+
+        /* Status banner */
+        .status {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 13px;
+            line-height: 1.6;
+            border: 1px solid;
+            transition: all 0.3s ease;
+        }
+        .status.safe {
+            background: rgba(74,222,128,0.08);
+            border-color: rgba(74,222,128,0.22);
+            color: #86efac;
+        }
+        .status.danger {
+            background: var(--red-dim);
+            border-color: var(--red-border);
+            color: #fca5a5;
+        }
+        .status.neutral {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.08);
+            color: var(--text-secondary);
+        }
+        .status-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--card-border);
+        }
+
+        /* Fact box */
+        .fact-label {
+            display: flex; align-items: center; gap: 7px;
+            font-size: 11px; font-weight: 500;
+            text-transform: uppercase; letter-spacing: 0.8px;
+            color: var(--text-hint);
+        }
+        .fact-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--blue);
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+        .fact-text {
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-hint);
+            transition: opacity 0.3s ease;
+            min-height: 58px;
+        }
+
+        /* Footer note */
+        .footer-note {
+            font-size: 11px;
+            color: var(--text-hint);
+            text-align: center;
+        }
+        .footer-note code {
+            font-family: 'DM Mono', monospace;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            padding: 1px 6px;
+            color: #94a3b8;
+        }
+
+        /* Responsive */
+        @media (max-width: 680px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="layout">
+
+        <!-- ── Left: Input form ── -->
+        <div class="card card-left">
+
+            <div class="card-header">
+                <div class="badge">
+                    <div class="badge-dot"></div>
+                    SQL Injection Demo
+                </div>
+                <div class="icon-wrap">🗄️</div>
+                <h1>Search Users</h1>
+                <p class="subtitle">
+                    Enter a username to look up. Try a normal name — or one
+                    of the injection payloads on the right.
+                </p>
+            </div>
+
+            <form action="/search" method="POST" id="searchForm">
+                <div class="field" style="margin-bottom:16px">
+                    <label for="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="e.g. alice"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div style="margin-bottom:20px">
+                    <p class="chip-label">Try these payloads</p>
+                    <div class="chips">
+                        <span class="chip" data-val="alice">alice</span>
+                        <span class="chip" data-val="' OR '1'='1">' OR '1'='1</span>
+                        <span class="chip" data-val="' OR 1=1 --">' OR 1=1 --</span>
+                        <span class="chip" data-val="admin'--">admin'--</span>
+                        <span class="chip" data-val="' UNION SELECT * FROM users --">' UNION SELECT…</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Run Query →</button>
+            </form>
+
+            <div class="divider"></div>
+
+            <div>
+                <div class="fact-label" style="margin-bottom:10px">
+                    <div class="fact-dot"></div>
+                    Did you know
+                </div>
+                <p class="fact-text" id="factBox">Loading fact…</p>
+            </div>
+
+            <p class="footer-note">
+                <code>EDU</code> &nbsp;Running locally · no data leaves your machine
+            </p>
+
+        </div>
+
+        <!-- ── Right: Live query viewer ── -->
+        <div class="card card-right">
+
+            <p class="panel-label">Live query preview</p>
+
+            <div class="query-block">
+                <pre id="queryDisplay"><span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> username = <span class="str">'<span id="inputSlot">…</span>'</span></pre>
+            </div>
+
+            <div class="status neutral" id="statusBox">
+                <span class="status-icon">💡</span>
+                <span id="statusText">Start typing to see how your input affects the SQL query.</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <p class="panel-label">What SQL injection does</p>
+
+            <div style="display:flex; flex-direction:column; gap:12px; font-size:13px; color:var(--text-secondary); line-height:1.7;">
+                <p>
+                    A vulnerable query concatenates user input directly into SQL.
+                    Injecting <code style="font-family:'DM Mono',monospace; color:#f87171; background:rgba(248,113,113,0.1); border-radius:4px; padding:1px 5px;">' OR '1'='1</code>
+                    makes the condition always true, exposing every row.
+                </p>
+                <p>
+                    A <strong style="color:var(--text-primary); font-weight:500">parameterised query</strong>
+                    treats input as pure data — the database never interprets
+                    it as SQL — making injection impossible.
+                </p>
+            </div>
+
+            <div class="divider"></div>
+
+            <p class="panel-label" style="margin-bottom:10px">Safe vs vulnerable</p>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <div style="background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.2); border-radius:10px; padding:14px 16px;">
+                    <p style="font-size:11px; font-weight:500; color:#f87171; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:8px;">❌ Vulnerable</p>
+                    <pre style="font-family:'DM Mono',monospace; font-size:12px; color:#94a3b8; line-height:1.7; white-space:pre-wrap;">"SELECT * FROM users WHERE username = '" + username + "'"</pre>
+                </div>
+                <div style="background:rgba(74,222,128,0.07); border:1px solid rgba(74,222,128,0.2); border-radius:10px; padding:14px 16px;">
+                    <p style="font-size:11px; font-weight:500; color:#4ade80; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:8px;">✅ Safe (parameterised)</p>
+                    <pre style="font-family:'DM Mono',monospace; font-size:12px; color:#94a3b8; line-height:1.7; white-space:pre-wrap;">"SELECT * FROM users WHERE username = ?" , (username,)</pre>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+<script>
+    // ── Payload detection ──────────────────────────────────────────────────
+    const INJECT_PATTERNS = [
+        /'/,
+        /--/,
+        /\bOR\b/i,
+        /\bAND\b/i,
+        /\bUNION\b/i,
+        /\bSELECT\b/i,
+        /\bDROP\b/i,
+        /\bINSERT\b/i,
+        /\bDELETE\b/i,
+        /\/\*/,
+        /;/,
+    ];
+
+    function classify(val) {
+        if (!val.trim()) return "empty";
+        return INJECT_PATTERNS.some(p => p.test(val)) ? "injection" : "safe";
+    }
+
+    // ── Live query preview ─────────────────────────────────────────────────
+    const inputEl   = document.getElementById("username");
+    const slotEl    = document.getElementById("inputSlot");
+    const queryPre  = document.getElementById("queryDisplay");
+    const statusBox = document.getElementById("statusBox");
+    const statusTxt = document.getElementById("statusText");
+
+    function updatePreview(val) {
+        const kind = classify(val);
+
+        if (kind === "empty") {
+            queryPre.innerHTML = `<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> username = <span class="str">'<span id="inputSlot">…</span>'</span>`;
+            setStatus("neutral", "💡", "Start typing to see how your input affects the SQL query.");
+            return;
+        }
+
+        const escaped = val.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        if (kind === "safe") {
+            queryPre.innerHTML = `<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> username = <span class="str">'<span class="safe">${escaped}</span>'</span>`;
+            setStatus("safe", "✅", "Looks like a normal input. The query targets only the matching username.");
+        } else {
+            // Split at first quote to highlight the injected part
+            const inParts = escaped.split(/(?<=^[^']*)'(.*)$/s);
+            let highlighted;
+            if (inParts.length > 1) {
+                highlighted = `<span class="safe">${inParts[0]}</span><span class="inj">'${inParts[1]}</span>`;
+            } else {
+                highlighted = `<span class="inj">${escaped}</span>`;
+            }
+            queryPre.innerHTML = `<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> username = <span class="str">'${highlighted}'</span>`;
+            setStatus("danger", "⚠️", "Injection detected. This payload could manipulate or bypass the query entirely.");
+        }
+    }
+
+    function setStatus(type, icon, text) {
+        statusBox.className = `status ${type}`;
+        statusBox.querySelector(".status-icon").textContent = icon;
+        statusTxt.textContent = text;
+    }
+
+    inputEl.addEventListener("input", () => updatePreview(inputEl.value));
+
+    // ── Payload chips ──────────────────────────────────────────────────────
+    document.querySelectorAll(".chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+            inputEl.value = chip.dataset.val;
+            updatePreview(inputEl.value);
+            inputEl.focus();
+        });
+    });
+
+    // ── Rotating facts ─────────────────────────────────────────────────────
+    const facts = [
+        "SQL injection has been in the OWASP Top 10 most critical web vulnerabilities for over 15 years straight.",
+        "The 2008 Heartland Payment Systems breach — one of the largest ever — began with a SQL injection attack.",
+        "Parameterised queries (prepared statements) completely eliminate SQL injection by separating code from data.",
+        "Automated tools like sqlmap can probe thousands of SQL injection vectors in minutes with no manual effort.",
+        "In 2012 a hacker stole 450,000 Yahoo user credentials using a single UNION-based SQL injection attack.",
+        "Bobby Tables — the XKCD comic about dropping a school database — is named after the classic SQL injection joke payload.",
+        "Even a read-only SQL injection can expose every password hash, email, and private record in a database.",
+        "Web application firewalls can block many injection attempts, but they are not a substitute for parameterised queries.",
+        "Time-based blind injection lets attackers extract data even when the application returns no visible output.",
+        "Modern ORM libraries like SQLAlchemy use parameterised queries by default, making injection much harder to introduce by accident.",
+    ];
+
+    const factBox = document.getElementById("factBox");
+    let lastFact  = -1;
+
+    function showFact() {
+        let next;
+        do { next = Math.floor(Math.random() * facts.length); } while (next === lastFact);
+        lastFact = next;
+        factBox.style.opacity = 0;
+        setTimeout(() => { factBox.textContent = facts[next]; factBox.style.opacity = 1; }, 280);
+    }
+
+    showFact();
+    setInterval(showFact, 6000);
+</script>
+
+</body>
+</html>

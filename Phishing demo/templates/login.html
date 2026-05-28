@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Awareness Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --blue-mid: #3b82f6;
+            --purple-mid: #8b5cf6;
+            --card-bg: rgba(255, 255, 255, 0.07);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --input-bg: rgba(255, 255, 255, 0.06);
+            --input-border: rgba(255, 255, 255, 0.15);
+            --input-focus: rgba(59, 130, 246, 0.5);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-hint: #64748b;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'DM Sans', sans-serif;
+            background: #0d1117;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle ambient glows */
+        .glow-1 {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%);
+            top: -150px;
+            left: -100px;
+            pointer-events: none;
+            animation: drift1 12s ease-in-out infinite alternate;
+        }
+
+        .glow-2 {
+            position: fixed;
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%);
+            bottom: -120px;
+            right: -80px;
+            pointer-events: none;
+            animation: drift2 12s ease-in-out infinite alternate;
+        }
+
+        @keyframes drift1 {
+            from { transform: translate(0, 0); }
+            to   { transform: translate(40px, 50px); }
+        }
+
+        @keyframes drift2 {
+            from { transform: translate(0, 0); }
+            to   { transform: translate(-40px, -50px); }
+        }
+
+        /* Card */
+        .card {
+            position: relative;
+            z-index: 10;
+            width: 480px;
+            padding: 48px 44px;
+            border-radius: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.04) inset,
+                0 20px 60px rgba(0,0,0,0.55);
+            animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Header */
+        .card-header {
+            margin-bottom: 32px;
+        }
+
+        .lock-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(59,130,246,0.25), rgba(139,92,246,0.25));
+            border: 1px solid rgba(99,160,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .card-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+            margin-bottom: 6px;
+        }
+
+        .card-header p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Form */
+        .field {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            letter-spacing: 0.2px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 16px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            color: var(--text-primary);
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+
+        input::placeholder {
+            color: var(--text-hint);
+        }
+
+        input:focus {
+            background: rgba(255,255,255,0.09);
+            border-color: rgba(99, 160, 255, 0.55);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+            letter-spacing: 0.1px;
+        }
+
+        .btn:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(59,130,246,0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--card-border);
+            margin: 28px 0;
+        }
+
+        /* Fact box */
+        .fact-section {
+            margin-bottom: 20px;
+        }
+
+        .fact-label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-hint);
+            margin-bottom: 12px;
+        }
+
+        .fact-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--blue-mid);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.85); }
+        }
+
+        .fact-text {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            min-height: 66px;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Footer */
+        .card-footer {
+            font-size: 12px;
+            color: var(--text-hint);
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .card-footer span {
+            display: inline-block;
+            background: rgba(59,130,246,0.1);
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 5px;
+            padding: 2px 7px;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: #60a5fa;
+            margin-right: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="glow-1"></div>
+    <div class="glow-2"></div>
+
+    <div class="card">
+
+        <div class="card-header">
+            <div class="lock-icon">🔐</div>
+            <h1>Security Login</h1>
+            <p>Sign in to your secure account</p>
+        </div>
+
+        <form action="/login" method="POST">
+
+            <div class="field">
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="••••••••••" required>
+            </div>
+
+            <button type="submit" class="btn">Sign in</button>
+
+        </form>
+
+        <div class="divider"></div>
+
+        <div class="fact-section">
+            <div class="fact-label">
+                <div class="fact-dot"></div>
+                Security tip
+            </div>
+            <p class="fact-text" id="factBox">Loading tip…</p>
+        </div>
+
+        <div class="card-footer">
+            <span>EDU</span>
+            Phishing-awareness simulation · running locally
+        </div>
+
+    </div>
+
+<script>
+    const facts = [
+        "The first computer bug was literally a dead moth found inside the Harvard Mark II computer in 1947. Debugging has never sounded more accurate.",
+        "A weak password can be cracked in seconds, but a strong 14+ character password with symbols can take millions of years to brute-force.",
+        "Over 90% of successful cyberattacks begin with phishing because humans are usually easier to hack than computers.",
+        "The first 1GB hard drive released by IBM in 1980 weighed over 250 kilograms and cost around $40,000. Your phone now has thousands of times more storage.",
+        "Linux powers most servers on the internet, supercomputers, Android phones, satellites, and even some smart refrigerators.",
+        "NASA still uses extremely old but stable systems for some missions because reliability matters more than flashy updates in space.",
+        "The first website ever created is still online today. It was made by Tim Berners-Lee to explain what the World Wide Web actually was.",
+        "Hackers often rely on panic and urgency. Messages like 'Your account will be deleted in 24 hours' are classic social engineering tricks.",
+        "The '@' symbol is officially called the at-sign, but programmers have given it dozens of nicknames including snail, monkey tail, and strudel.",
+        "Typing '123456' as your password is basically the cybersecurity equivalent of locking your house and leaving the key on the door.",
+        "The blue screen of death has scared generations of computer users and has probably caused more panic than actual system damage.",
+        "Some malware can stay hidden inside a system for months silently collecting data before anyone notices something is wrong.",
+        "Wi-Fi signals weaken when passing through walls, metal, mirrors, and even fish tanks because water absorbs radio waves.",
+        "Cybersecurity experts often cover webcams because remote-access malware can secretly activate cameras without turning the indicator light on.",
+        "The first webcam was created at Cambridge University just to monitor a coffee pot so researchers could avoid walking to an empty machine.",
+        "Modern smartphones are more powerful than the computers used during the Apollo moon missions that landed humans on the Moon.",
+        "Every minute thousands of passwords, emails, and leaked databases are posted online by attackers and data brokers.",
+        "Programmers can spend 5 hours fixing a bug and then accidentally solve it by adding a missing semicolon.",
+        "The strongest firewall in the world still cannot protect someone who clicks 'FREE GIFT CARD CLICK HERE NOW'."
+    ];
+
+    const factBox = document.getElementById('factBox');
+    let current = -1;
+
+    function showFact() {
+        let next;
+        do { next = Math.floor(Math.random() * facts.length); } while (next === current);
+        current = next;
+
+        factBox.style.opacity = 0;
+        setTimeout(() => {
+            factBox.textContent = facts[current];
+            factBox.style.opacity = 1;
+        }, 300);
+    }
+
+    showFact();
+    setInterval(showFact, 5000);
+</script>
+
+</body>
+</html>
