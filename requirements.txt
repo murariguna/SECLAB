@@ -1,0 +1,1 @@
+paramiko pycryptodome opencv-python pyautogui numpy
